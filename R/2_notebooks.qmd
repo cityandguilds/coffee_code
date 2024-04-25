@@ -1,6 +1,7 @@
 ---
 title: "Quarto (Rmarkdown)"
 author: "Stephen J. Price"
+date: '`r lubridate::dmy("25/04/24")`'
 format: html
 editor: visual
 ---
@@ -28,9 +29,9 @@ The `echo: false` option disables the printing of code (only output is displayed
 
 ## Recapping last week
 
-We generated an \[R script with some basic commands\](coffee_code/R/1_getting_started.R at main · cityandguilds/coffee_code (github.com).
+We generated an [R script with some basic commands](https://github.com/cityandguilds/coffee_code/blob/main/R/1_getting_started.R).
 
-I'm going to refactor it now within a quarto doc to show you some of the features of this kind of doc.
+I'm going to refactor it now within a quarto doc to show you some of the features of this kind of document.
 
 ### Vectors
 
