@@ -2,3 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
+R/*.html
+R/2_notebooks_files

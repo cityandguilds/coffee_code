@@ -1,0 +1,173 @@
+---
+title: "Quarto (Rmarkdown)"
+author: "Stephen J. Price"
+format: html
+editor: visual
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+## Recapping last week
+
+We generated an \[R script with some basic commands\](coffee_code/R/1_getting_started.R at main · cityandguilds/coffee_code (github.com).
+
+I'm going to refactor it now within a quarto doc to show you some of the features of this kind of doc.
+
+### Vectors
+
+a one-dimensional data structure
+
+```{r}
+LETTERS
+letters
+1:10
+1:100
+
+```
+
+### concatenate
+
+a simple function for everyday use! Functions are called by typing the function name, then a pair of parentheses, and then some information for the function to act on.
+
+```{r}
+c(2, 4, 6, 8, 10)
+
+```
+
+### assignment
+
+storing something (to a name)
+
+```{r}
+evens <- c(2, 4, 6, 8, 10)
+
+```
+
+alt- (alt-minus) is the keyboard shortcut for this 'assignment' operator.
+
+Now, I can use the name to access the values I stored there
+
+```{r}
+evens
+
+```
+
+### indexing
+
+how to get at values
+
+```{r}
+LETTERS # the whole alphabet
+LETTERS[5] # the 5th letter of the alphabet
+LETTERS[c(2, 4, 6, 8, 10)] # the 2nd, 4th, 6th, 8th, 10th letters
+LETTERS[evens] # equivalent to line above
+
+```
+
+### matrices
+
+a 2D data structure
+
+```{r}
+matrix(data = 1:10, ncol = 2)
+mymat <- matrix(data = 1:10, ncol = 2)
+mymat[1, 1] # value in the first row, first column
+mymat[1, 2] # value in the first row, second column
+mymat[, 2] # the vector of values stored as the second column
+
+```
+
+### dataframes
+
+data tables extend matrices and again provide a 2D structure where we can store and access data.
+
+`mtcars` is a famous built-in R dataframe. We can access the dataset by typing the name.
+
+```{r}
+mtcars 
+
+```
+
+We can access values as we did with our matrix `mymat`.
+
+```{r}
+mtcars[1, 1]
+```
+
+But this dataframe has both row and column names in addition to the 'matrix' of values...
+
+```{r}
+rownames(mtcars)
+colnames(mtcars)
+names(mtcars) # equivalent to line above here
+
+```
+
+And we can also use these names to access the data. There are two equivalent notations for accessing a variable:
+
+```{r}
+mtcars$mpg # returns a vector of values stored in the first field/variable in the mtcars dataframe 
+mtcars[["mpg"]] # equivalent to line above. Alternative notation.
+
+```
+
+Going a bit further. Filtering for certain values:
+
+```{r}
+mtcars$cyl
+unique(mtcars$cyl) |> sort()
+
+mtcars$cyl[mtcars$cyl > 4]
+unique(mtcars$cyl[mtcars$cyl > 4])
+
+```
+
+We can use this idea to subset our dataset.
+
+```{r}
+mtcars[mtcars$cyl > 4, ]
+
+nrow(mtcars)
+
+nrow(mtcars[mtcars$cyl > 4, ])
+
+```
+
+To translate this:
+
+> Take the mtcars data table `mtcars` and look at the value of the 'cyl' variable `mtcars$cyl`. If the value is more than 4, keep the row `[blah, ]`.
+
+### plotting
+
+```{r}
+plot(x = mtcars$cyl, y = mtcars$mpg) # dotplot 
+split(mtcars$mpg, mtcars$cyl) |> boxplot() # ah, that's better :)
+
+```
+
+And to visualise our dataset subsetting...
+
+```{r}
+dat <- mtcars[mtcars$cyl > 4, ]
+split(dat$mpg, dat$cyl) |> boxplot()
+
+```
