@@ -1,0 +1,353 @@
+---
+title: "3. Basic Analyses in R"
+author: "Sam Anees-Hill"
+date: '`r lubridate::dmy("02/05/24")`'
+format: html
+editor: visual
+---
+
+## Recapping last week
+
+We covered the use of Quarto documents, vectors, the concatenate function, indexing and Rstudio in [Week 2](https://github.com/cityandguilds/coffee_code/blob/main/R/2_notebooks.qmd).
+
+This week we'll look at performing a basic analytical workflow in R and compare the approach with Microsoft Excel.
+
+#### Importing data using the import tool
+
+Use the files pane to find a file. Click on the file, click *import dataset*, then press okay on the pop-up window. The code is printed to the console.
+
+The data is automatically read in as a data.frame. These are essentially a grouped collection of vectors of the same length.
+
+Here is the console output for me after using the import tool:
+
+```{r}
+data <- read.csv("FILEPATH TO THE .CSV FILE")
+```
+
+Data.frames are essentially a collection of vectors (can be multiple types, i.e. character and numerical) that are the same length
+
+```{r}
+class(data)
+```
+
+## Data overview
+
+R provides functions that allow quick exploration of the data, including:
+
+Data.frame dimensions (rows vs columns)
+
+```{r}
+dim(data)
+
+nrow(data)
+ncol(data)
+```
+
+Show the top 6 rows of the data.frame:
+
+> or see more or less rows, i.e. using `head(data, n = 20)`
+
+```{r}
+head(data, n = 1)
+```
+
+Show the last 6 rows of a data.frame:
+
+```{r}
+tail(data)
+```
+
+Show descriptive statistics for each column within the data.frame:
+
+```{r}
+summary(data)
+```
+
+> In Excel, this would involve formulas per column, or use of a pivottable
+
+## Use of 'tidy data' in R
+
+Tidy data is a way of making data easier to work with, and is a way to standardized way to "*link the structure of a dataset (its physical layout) with its semantics (its meaning)*".
+
+In a 'tidy' dataset:
+
+-   Columns represent variables.
+
+-   Rows represent individual observations.
+
+This makes it more straightforward to manipulate and visualise the data, and enhances clarity and efficiency.
+
+> See [Chpt12 in 'R for Data Science'](https://r4ds.had.co.nz/tidy-data.html) for a comprehensive explanation of 'tidy data'
+
+#### Making the sales data set tidy:
+
+```{r}
+# Make data tidy
+# This code uses a function from the 'tidyr' package.
+# If this code doesn't work, install this package using install.packages('tidyr')
+data_long <- tidyr::pivot_longer(data,
+                            cols = 5:8,
+                            names_to = "qualification",
+                            values_to = "quantity_ordered")
+```
+
+```{r}
+# New 'tidy' data structure
+head(data_long)
+```
+
+Calculating a new column:
+
+```{r}
+# Calculate a new column 'SALES'
+data_long$sales <- data_long$course_cost * data_long$quantity_ordered
+# Excel: formula
+
+data_long$sales[1:10]
+```
+
+> In Excel, this would involve creating a new column and using formulas per cell.
+
+# 
+
+## Basic exploratory data analysis (EDA)
+
+There are a range of R functions that facilitate quick explration of the data. These can be used to create quick glances of the data rather than high-quality plots for documents, including:
+
+Looking at **Numerical** variables:
+
+Histograms:
+
+```{r}
+hist(data_long$course_cost)
+hist(data_long$sales)
+```
+
+Correlation between two numerical variables:
+
+```{r}
+cor(data_long$sales, data_long$quantity_ordered)
+```
+
+Scatterplots:
+
+```{r}
+plot(data_long$sales, data_long$quantity_ordered)
+```
+
+Looking at **Categorical** variables:
+
+Frequency tables:
+
+```{r}
+table(data_long$status)
+```
+
+```{r}
+table(data_long$qualification)
+```
+
+> In Excel: using pivot table (rows = status, values = count of status)
+
+In the second frequency example above, each of the qualifications had the same number of counts. This is because many of the qualification categories have counts of zero (see below):
+
+We can remove all rows where the `quantity_ordered` value is zero by using **subsetting**:
+
+```{r}
+# Subset the data to remove rows where the quantity_ordered = 0
+data_long <- data_long[data_long$quantity_ordered > 0,]
+
+# Rerun the table() function
+table(data_long$qualification)
+
+```
+
+```{r}
+# Scatterplot for a single variable
+plot(data_long$quantity_ordered)
+```
+
+```{r}
+# Subset to keep orders where the quanity ordered was over 55 units
+high_quantity <- data_long[data_long$quantity_ordered > 55,]
+
+nrow(high_quantity)
+head(high_quantity)
+```
+
+## Exporting the data
+
+```{r}
+# Export the data into .csv format
+write.csv(high_quantity, "high_quantity.csv")
+```
+
+## Data with a time element
+
+In R. date columns may be interpreted as `character` type variables:
+
+```{r}
+class(data_long$order_date)
+```
+
+These can be **parsed** to **date** type:
+
+```{r}
+data_long$order_date <- as.Date(data_long$order_date, format = "%d/%m/%Y")
+class(data_long$order_date)
+```
+
+The range() function shows the min and max values for a variable, including dates:
+
+```{r}
+range(data_long$order_date)
+```
+
+> In Excel, we would use a pivot table or MIN and MAX formulas.
+
+We can also **subset** dates:
+
+```{r}
+data_apr <- data_long[data_long$order_date > as.Date("2024-04-01"),]
+```
+
+Time-series plots (a line plot where the x-axis is time/dates) can be plotted quickly using `plot.ts()`:
+
+```{r}
+plot.ts(data_apr$sales)
+```
+
+> In Excel, we would create a line plot by:
+>
+> 1\. Insert \> scatter with smooth lines
+>
+> 2\. 'Select data'
+>
+> 3\. 'Add'
+>
+> 4\. Series X values = ORDERDATE
+>
+> 5\. Series Y values = SALES
+
+Further investigation: isolate the high values in the data.frame
+
+```{r}
+# What happened there?
+data_long[1:10, "sales"]
+```
+
+```{r}
+data_long[data_long$sales > 7000,]
+```
+
+```{r}
+high_yield_dates <- data_long[data_long$sales > 7000,]
+
+
+high_yield_dates
+```
+
+## Further reading: routine analyses using tidyverse functions
+
+```{r}
+# Packages can be installed with install.packages. i.e. install.packages("dplyr")
+# Packages only need to be installed once.
+library(dplyr)
+
+dplyr::glimpse(data_long)
+
+data_long <-
+  data_long |> 
+  mutate(sales = course_cost * quantity_ordered)
+
+summary <-
+  data_long |> 
+  group_by(status) |> 
+  summarise(total_sales = sum(sales))
+
+summary
+```
+
+```{r}
+library(ggplot2)
+options(scipen=999) # to prevent scientific notation being used on a numerical axis
+
+summary |> 
+  ggplot(aes(status, total_sales)) +
+  geom_col(fill = "#f14f02") +
+  theme_bw() +
+  labs(
+    x = "Order status",
+    y = "Total sales"
+  )
+
+```
+
+```{r}
+data_long |> 
+  ggplot(aes(status, sales, fill = qualification)) +
+  geom_col() +
+  theme_bw() +
+  labs(
+    x = "Order status",
+    y = "Total sales"
+  ) +
+  facet_wrap(~qualification) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+## More on importing data
+
+Data can be imported into R programatically, or with use of the RStudio import tool.
+
+#### Programmatically:
+
+The R session is always 'set' within a specific **working directory**. To locate this, use `getwd()`:
+
+```{r}
+getwd()
+```
+
+The working directory can be changed using `setwd()`.
+
+> Note: file paths should use forward slashes (/), not backslashes!
+
+```{r}
+# Relative route
+setwd("PUT YOUR FILE PATH EXCEPT THE FILENAME HERE")
+data <- read.csv("sales_data_sample.csv")
+
+# Absolute filepath route
+data <- read.csv("PUT YOUR FILE PATH INCLUDING THE FILENAME HERE")
+
+# Or import data directly from the internet: i.e. from github
+
+
+```
+
+## Summary
+
+Excel is good at:
+
+-   'Looking at the data' (unless its a large dataset).
+
+-   Working with small datasets
+
+-   Reporting: can create quick reports that are accessible to the team
+
+-   Real-time collaboration
+
+R is good at:
+
+-   Faster workflow.
+
+-   Automation and reproducibility.
+
+-   Working with large datasets.
+
+-   Statistical analysis.
+
+-   High-quality visualisations / interactive plots
+
+-   Many packages thanks to R being open-source
