@@ -14,7 +14,7 @@ Ultimately, the marking app provides marking summaries for download but it doesn
 
 This is a massive win for coffee & code itself as it provided a forum for users and developers to come together and discuss a tool and identify an issue that has not come to light in the same way elsewhere. We can now work to improve the tool.
 
-But for now, let's look at we might use R to improve the current Excel workaround and deliver an efficiency in the first instance before looking at other benefits we might build into the new workflow.
+But for now, let's look at how we might use R to improve the current Excel workaround and deliver an efficiency in the first instance before looking at other benefits we might build into the new workflow.
 
 ## The problem
 
