@@ -1,0 +1,123 @@
+---
+title: "Tackling a real C&G problem"
+format: html
+editor: visual
+---
+
+## Background
+
+The marking app is a shiny application for live monitoring of marking for T Levels and Technicals that we launched at the start of 2024, aimed mostly at users in the assessment team.
+
+One of the assessment team users highlighted in coffee & code on 9th May that they were doing some additional analysis of their own in Excel having downloaded some data from the marking app. They were carrying out this manual analysis on a periodic basis (repeatedly).
+
+Ultimately, the marking app provides marking summaries for download but it doesn't deliver all of the desired insights.
+
+This is a massive win for coffee & code itself as it provided a forum for users and developers to come together and discuss a tool and identify an issue that has not come to light in the same way elsewhere. We can now work to improve the tool.
+
+But for now, let's look at we might use R to improve the current Excel workaround and deliver an efficiency in the first instance before looking at other benefits we might build into the new workflow.
+
+## The problem
+
+The marking app includes analysis of how markers compare to lead examiners where there is script sampling, effectively where lead examiners act as a second marker.
+
+The analysis is presented at a *per marker, per item* level, we ask how often does the lead examiner award a different mark, i.e. for each item and marker, the app summaries the performance compared to the lead examiner across all the scripts that were marked. Summary data at this *per item, per marker* level are available for download.
+
+However, it turns out that the assessment teams are also interested in this kind of summary at a different, higher level. They want a simpler *per marker* summary, i.e. forget about which item it was, what's the overall comparison between markers and leads if we just think in terms of the total questions mark (number of items on test multiplied by the number of scripts marked)?
+
+It's fairly straightforward to effectively collapse the data summary provided by the app by one level to obtain the higher level summary we want as well.
+
+## An Excel solution
+
+Excel pivot tables offer a means to solve this problem. We can open the downloaded csv in Excel and use the pivot table functionality to select variables to summarise and operations to perform using a point and click approach. It doesn't take long to generate the principle new metric we're after.
+
+![Using an Excel pivot table to summarise marking data](5_resources/pivot_screenshot.png){fig-alt="A screenshot of using an Excel pivot table to summarise marking data"}
+
+Now, this didn't take long but when I want to update it tomorrow I've got to do the whole thing again from start to finish.
+
+Another problem that jumps out for me is the field or column names of our pivot table. Excel generated these for us based on the operation we were performing and the name of the original variable that we were operating on. But they're pretty opaque and it's not immediately obvious from the names what the statistics represent (even when you have a very deep understanding of the original data and how the new stats were assembled!).
+
+Let's see how we could tackle this in R.
+
+## An approach using R
+
+I'm going to use a couple of packages of functions that don't come shipped with your base installation of R. You might need to install these if you want to run this code yourself.
+
+To install packages of code that you don't have, you can use the `install.packages()` function. I'm going to use 3 non-base packages here: `readr`, `dplyr` & `scales`. You would run `install.packages("readr")` to install the first of these.
+
+I already have them so I'll just 'load' them using the `library()` function to make all their functions available to me for my current session.
+
+```{r}
+library(readr)
+library(dplyr)
+library(scales)
+
+```
+
+I'm taking an extract of marker data from the marking app as described above. I've moved the data from my Downloads folder to my coffee and code project directory so that I can share it more easily but I've included the code to pick up the data from 'Downloads' as a comment.
+
+Okay, let's go ahead and read the data file and keep it in memory in our R session, stored under a name so that we can use it.
+
+```{r}
+# mydat <- read_csv(
+#   "C:/Users/stephenpri/Downloads/cc_marking.csv", 
+#   show_col_types = FALSE
+#   )
+mydat <- read_csv(
+  "5_resources/cc_marking.csv", 
+  show_col_types = FALSE
+  )
+
+mydat
+```
+
+Now, let's go ahead and summarise it and create our new, higher-level metric, the percentage of the total items marked that differ between markers and leads.
+
+We can calculate the total items marked from the number of items per script and the number of scripts marked so we want to extract these statistics from our original dataset. We also need the total number of items marked where the marker and lead disagreed. We want to summarise at a *per marker* level so we `group_by` marker and then summarise as we just described.
+
+```{r}
+my_summary <- mydat |> 
+  group_by(Marker) |> 
+  summarise(
+    number_items = n(),
+    number_scripts = unique(Scripts),
+    total_items_different = sum(`Number of candidates with differences`)
+  ) 
+
+my_summary
+```
+
+We've now got all the basic information we need to generate our metric so we've effectively finished working with our original dataset and can just process our summary data from here onwards. We need to generate or engineer some new fields from other columns in our data and we can use `dplyr::mutate()` for this.
+
+```{r}
+my_output <- my_summary |> 
+  mutate(
+    total_items = number_scripts * number_items,
+    prop_different = total_items_different / total_items,
+    pc_different = percent(prop_different, accuracy = 1)
+    )
+
+my_output
+```
+
+We might not want all of the interim fields when we do our reporting though so we can streamline our output with `dplyr::select()`.
+
+```{r}
+my_output |> 
+  select(Marker, number_scripts, pc_different)
+```
+
+And we might want to tidy up this output for presenting it to others, so let's work on those variable names and print the table using a function dedicated to rendering nice tables (`kable()` from the `knitr` package).
+
+```{r}
+my_output |> 
+  select(Marker, number_scripts, pc_different) |> 
+  knitr::kable(
+    col.names = c(
+      "Marker ID", 
+      "Number of Scripts", 
+      "% items with differences from lead"
+      )
+  )
+```
+
+I like this. We are explicit about everything we do. It's ready to communicate clearly. And it's ready to run again tomorrow when more marking has been completed.
