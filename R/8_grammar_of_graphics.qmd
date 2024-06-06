@@ -1,0 +1,86 @@
+---
+title: "Plots - grammar of graphics"
+author: "Stephen J. Price"
+format: 
+  html:
+    self-contained: true
+editor: visual
+---
+
+## Base plots
+
+Here's a plot we made back in week 1 using base R functions.
+
+```{r}
+plot(x = mtcars$cyl, y = mtcars$mpg) # dotplot
+split(mtcars$mpg, mtcars$cyl) |> boxplot() # ah, that's better :)
+
+```
+
+## Grammar of graphics
+
+The 'grammar of graphics' comes as an extra package that you'll need to install if you haven't already.
+
+```{r}
+# install.packages("ggplot2") 
+library(ggplot2)
+```
+
+We're going to build up a beautiful plot in layers.
+
+### grid
+
+```{r}
+p <- mtcars |> 
+  ggplot(aes(x = cyl, y = mpg))
+p
+```
+
+### boxplot
+
+```{r}
+p + geom_boxplot(aes(group = cyl))
+```
+
+### colour
+
+```{r}
+p <- p + geom_boxplot(aes(group = cyl, fill = factor(cyl) |> factor()))
+p
+```
+
+### labels
+
+Tick labels on the x-axis need tidied up.
+
+```{r}
+p <- p + ggplot2::scale_x_continuous(breaks = c(4, 6, 8))
+p
+```
+
+```{r}
+p <- p +
+  labs(
+    y = "Miles per gallon (miles)",
+    x = "No. of cylinders",
+    title = "Figure 1. Fuel efficiency decreases with engine size",
+    subtitle = "Boxplot summary of miles per gallon against the number of cylinders",
+    caption = "Source: mtcars dataset"
+  )
+p
+```
+
+### theme
+
+```{r}
+p <- p + 
+  theme_bw() +
+  theme(legend.position = "none")
+p
+```
+
+### Faceting (creating a plot with multiple panels)
+
+```{r}
+p + facet_wrap(~am)
+```
