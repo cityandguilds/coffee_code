@@ -1,0 +1,207 @@
+---
+title: "Joining tables with dplyr"
+author: "Matt Hawkins"
+format: 
+  html:
+    self-contained: true
+editor: visual
+---
+
+## Introduction to joins
+
+If you're familiar with relational databases (SQL Server, MySQL, PostgreSQL, SQLite, Access, etc.) and have written any SQL then you will probably have come across joins before.
+
+If you've used VLOOKUP or XLOOKUP in Excel, you're essentially performing a simple join.
+
+There are many different ways to join two tables, all of which are listed in the `dplyr` documentation at <https://dplyr.tidyverse.org/reference/#data-frames>. Also see <https://dplyr.tidyverse.org/reference/join_by.html> for good examples of the versatility that `dplyr` can provide when joining data.
+
+Also see this blog post on 6 different types of join: <https://statisticsglobe.com/r-dplyr-join-inner-left-right-full-semi-anti>
+
+### Example data
+
+Here we'll create two really simple data sets to demonstrate the different join types.
+
+```{r}
+data1 <-
+  tibble::tribble(
+    ~ID,  ~X1,
+      1, "a1",
+      2, "a2"
+  )
+
+data2 <-
+  tibble::tribble(
+    ~ID,  ~X2,
+      2, "b1",
+      3, "b2"
+  )
+```
+
+### Mutating joins
+
+Mutating joins add columns from `y` to `x`, matching observations based on the keys. There are four mutating joins: the inner join, and the three outer joins.
+
+```{r}
+data1
+```
+
+```{r}
+data2
+```
+
+#### Inner join
+
+An `inner_join()` only keeps observations from `x` that have a matching key in `y`.
+
+The most important property of an inner join is that unmatched rows in either input are not included in the result. This means that generally inner joins are not appropriate in most analyses, because it is too easy to lose observations.
+
+```{r}
+dplyr::inner_join(x = data1, y = data2, by = "ID")
+```
+
+#### Outer joins
+
+The three outer joins keep observations that appear in at least one of the data frames:
+
+-   A `left_join()` keeps all observations in `x`.
+
+```{r}
+dplyr::left_join(x = data1, y = data2, by = "ID")
+```
+
+-   A `right_join()` keeps all observations in `y`.
+
+```{r}
+dplyr::right_join(x = data1, y = data2, by = "ID")
+```
+
+-   A `full_join()` keeps all observations in `x` and `y`.
+
+```{r}
+dplyr::full_join(x = data1, y = data2, by = "ID")
+```
+
+### More joins
+
+See if you can work out what semi join and anti join do based on the diagram below:
+
+![](images/clipboard-4239129460.png)
+
+## Joins in practice
+
+In practice we have practical uses for these joins. We keep records of all candidates registered with us through centres, some of their personal data, information on the papers/exams we sit, and data provided by markers.
+
+### Realistic data
+
+Some more realistic data sets to demo practical use.
+
+```{r}
+registrations <-
+  tibble::tribble(
+    ~candidate_id, ~program_of_study, ~date_registered,
+                1,         "9001-10",     "2023-09-01",
+                2,         "9001-10",     "2023-09-02",
+                3,         "9030-30",     "2023-08-24",
+                4,         "9035-11",     "2023-09-15",
+                5,         "9035-11",     "2023-10-01"
+  ) |>
+  dplyr::mutate(
+    date_registered = lubridate::ymd(date_registered)
+  )
+
+candidates <-
+  tibble::tribble(
+    ~candidate_id, ~forename,     ~surname, ~date_of_birth,
+                1,    "Alex",     "Kimiko",   "2002-01-25",
+                2,   "Bella",    "Lynwood",   "1999-05-02",
+                3,  "Claire",     "Ashley",   "2001-12-04",
+                4,   "David",    "Summers",   "2002-03-12",
+                5,    "Emma", "Clementine",   "2001-10-23"
+  ) |>
+  dplyr::mutate(
+    dplyr::across(
+      .cols = tidyselect::starts_with("date"),
+      .fns = lubridate::ymd
+    )
+  )
+
+marks <-
+  tibble::tribble(
+    ~candidate_id, ~program_of_study,   ~exam_id,  ~date_taken, ~marks,
+                1,         "9001-10", "9001-001", "2024-03-12",     75,
+                1,         "9001-10", "9001-002", "2024-03-25",     64,
+                1,         "9001-10", "9001-301", "2024-03-18",     81,
+                2,         "9001-10", "9001-001", "2024-03-12",     80,
+                2,         "9001-10", "9001-002", "2024-03-25",     57,
+                2,         "9001-10", "9001-303", "2024-03-19",     86,
+                3,         "9030-30", "9030-501", "2024-05-23",     26,
+                4,         "9035-11", "9035-312", "2023-11-29",     55,
+                4,         "9035-11", "9035-313", "2024-03-05",     53,
+                4,         "9035-11", "9035-501", "2024-05-23",     46
+  ) |>
+  dplyr::mutate(
+    dplyr::across(
+      .cols = tidyselect::starts_with("date"),
+      .fns = lubridate::ymd
+    )
+  )
+
+exams <-
+  tibble::tribble(
+      ~exam_id,  ~date_taken, ~max_marks,
+    "9001-001", "2024-03-12",        100,
+    "9001-002", "2024-03-25",        100,
+    "9001-301", "2024-03-18",        100,
+    "9001-303", "2024-03-19",        100,
+    "9030-501", "2024-05-23",         60,
+    "9035-312", "2023-11-29",         60,
+    "9035-313", "2024-03-05",         60,
+    "9035-501", "2024-05-23",         60
+  ) |>
+  dplyr::mutate(
+    dplyr::across(
+      .cols = tidyselect::starts_with("date"),
+      .fns = lubridate::ymd
+    )
+  )
+```
+
+Suppose we have some marking data in a table, `marks`. This table has, for each paper taken by a candidate, and number of marks awarded by the marker.
+
+```{r}
+marks
+```
+
+But what if we want to turn this mark into a grade? We might need to know how many marks were available, grade boundaries, etc.
+
+```{r}
+exams
+```
+
+So we can use a left join to retain every row in `marks`, whilst pulling in the maximum marks column from the `exams` table.
+
+```{r}
+marks_with_maximum <-
+  dplyr::left_join(
+    x = marks,
+    y = exams
+  )
+```
+
+```{r}
+marks_with_maximum
+```
+
+What if we want all of this data combined into one table, so that we can see exactly who achieves each result, when they registered, etc.?
+
+```{r}
+everything <-
+  registrations |>
+  dplyr::left_join(candidates) |>
+  dplyr::left_join(marks) |>
+  dplyr::left_join(exams) # Explore use of dplyr::join_by here
+```
+
+```{r}
+everything # Note that candidate 5 has no marks
+```
