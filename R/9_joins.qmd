@@ -15,25 +15,27 @@ If you've used VLOOKUP or XLOOKUP in Excel, you're essentially performing a simp
 
 There are many different ways to join two tables, all of which are listed in the `dplyr` documentation at <https://dplyr.tidyverse.org/reference/#data-frames>. Also see <https://dplyr.tidyverse.org/reference/join_by.html> for good examples of the versatility that `dplyr` can provide when joining data.
 
-Also see this blog post on 6 different types of join: <https://statisticsglobe.com/r-dplyr-join-inner-left-right-full-semi-anti>
+Also see this blog post on 6 different types of join: <https://statisticsglobe.com/r-dplyr-join-inner-left-right-full-semi-anti>. Also see <https://r4ds.hadley.nz/joins#how-do-joins-work>.
 
 ### Example data
 
 Here we'll create two really simple data sets to demonstrate the different join types.
 
 ```{r}
-data1 <-
+x <-
   tibble::tribble(
-    ~ID,  ~X1,
-      1, "a1",
-      2, "a2"
+    ~key, ~val_x,
+       1,   "x1",
+       2,   "x2",
+       3,   "x3"
   )
 
-data2 <-
+y <-
   tibble::tribble(
-    ~ID,  ~X2,
-      2, "b1",
-      3, "b2"
+    ~key, ~val_y,
+       1,   "y1",
+       2,   "y2",
+       4,   "y3"
   )
 ```
 
@@ -42,21 +44,23 @@ data2 <-
 Mutating joins add columns from `y` to `x`, matching observations based on the keys. There are four mutating joins: the inner join, and the three outer joins.
 
 ```{r}
-data1
+x
 ```
 
 ```{r}
-data2
+y
 ```
 
 #### Inner join
 
 An `inner_join()` only keeps observations from `x` that have a matching key in `y`.
 
+![](images/clipboard-2194280736.png){width="350"}
+
 The most important property of an inner join is that unmatched rows in either input are not included in the result. This means that generally inner joins are not appropriate in most analyses, because it is too easy to lose observations.
 
 ```{r}
-dplyr::inner_join(x = data1, y = data2, by = "ID")
+dplyr::inner_join(x, y, by = "key")
 ```
 
 #### Outer joins
@@ -65,20 +69,26 @@ The three outer joins keep observations that appear in at least one of the data 
 
 -   A `left_join()` keeps all observations in `x`.
 
+    ![](images/clipboard-3136876139.png){width="350"}
+
 ```{r}
-dplyr::left_join(x = data1, y = data2, by = "ID")
+dplyr::left_join(x = x, y = y, by = "key")
 ```
 
 -   A `right_join()` keeps all observations in `y`.
 
+    ![](images/clipboard-3854667894.png){width="350"}
+
 ```{r}
-dplyr::right_join(x = data1, y = data2, by = "ID")
+dplyr::right_join(x = x, y = y, by = "key")
 ```
 
 -   A `full_join()` keeps all observations in `x` and `y`.
 
+    ![](images/clipboard-2342260116.png){width="350"}
+
 ```{r}
-dplyr::full_join(x = data1, y = data2, by = "ID")
+dplyr::full_join(x = x, y = y, by = "key")
 ```
 
 ### More joins
@@ -184,12 +194,16 @@ So we can use a left join to retain every row in `marks`, whilst pulling in the 
 marks_with_maximum <-
   dplyr::left_join(
     x = marks,
-    y = exams
+    y = exams,
+    by = dplyr::join_by(
+      exam_id == exam_id,
+      date_taken == date_taken
+    )
   )
 ```
 
 ```{r}
-marks_with_maximum
+marks_with_maximum |> dplyr::mutate(pc = 100 * marks / max_marks)
 ```
 
 What if we want all of this data combined into one table, so that we can see exactly who achieves each result, when they registered, etc.?
