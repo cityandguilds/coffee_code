@@ -1,0 +1,394 @@
+---
+title: "Working with dates and times in R"
+author: "Sam Anees-Hill"
+format: 
+  html:
+    self-contained: true
+editor: visual
+---
+
+## Working with dates and times in R
+
+Working with date and time data in R can be difficult using **base functionality** in isolation, however, packages such as `lubridate` and `clock` can make these tasks much **easier**.
+
+[![](images/logo-lubridate.png)](https://lubridate.tidyverse.org/articles/lubridate.html)
+
+[![](images/logo-clock.png)](https://clock.r-lib.org/)
+
+In this session we'll approach this topic with use of the `lubridate` package. This well-known (well-used) package contains a range of functions designed to facilitate working with `Date` and `Date-time` classes.
+
+There is a really useful **cheat-sheet** here: <https://rstudio.github.io/cheatsheets/lubridate.pdf>
+
+### Loading `lubridate` and the example dataset to the namespace
+
+This tutorial will use `library()` calls to attach the lubridate and clock namespaces to the R session, so `lubridate::` and `clock::` notation will not be used for functions from these packages.
+
+```{r}
+# Lubridate
+library(lubridate)
+# Or run install.packages("lubridate") if the package is not installed
+
+library(clock)
+# Or run install.packages("clock") if the package is not installed
+
+library(nycflights13)
+# Or run install.packages("nycflights13") if the package is not installed
+```
+
+### Date and Datetime classes in R
+
+#### `Date`
+
+-   Base R
+
+-   Represents dates (that have no time element)
+
+```{r}
+class(dmy("01-01-2021"))
+```
+
+#### `POSIXct/POSIXlt`
+
+-   Base R
+
+-   Represents dates with time.
+
+```{r}
+class(dmy_hms("01-01-2021 01:00:00"))
+```
+
+#### `interval`, `duration`, `period`
+
+-   Classes from the `lubridate` package
+
+```{r}
+# Interval
+class(
+  interval(start = "2024-01-01", end = "2024-03-01")
+)
+
+# Duration
+class(
+  as.duration(
+    interval(start = "2024-01-01", end = "2024-03-01")
+  )
+)
+
+# Period
+class(
+  as.period(
+    interval(start = "2024-01-01", end = "2024-03-01")
+  )
+)
+```
+
+#### Classes from `clock`
+
+```{r}
+# clock_time_point
+class(sys_time_now())
+
+# duration
+class(duration_days(10))
+```
+
+### An Introduction to the `nycflights13` example data
+
+The `nycflights13` package is actually a collection of related **tibbles**, but is structured as a package to make loading these an easy task. The package contains five tibbles:
+
+```{r}
+head(nycflights13::airlines)
+head(nycflights13::airports)
+head(nycflights13::planes)
+head(nycflights13::weather)
+head(nycflights13::flights)
+```
+
+As mentioned, these tibbles have relational properties in that the data all concern the same topic, but have been broken up into separate tables. These data already meet
+
+the rules of **tidy data**, which (as a reminder):
+
+1.  Every row is an observation
+
+2.  Every column is a variable
+
+3.  Each cell contains a single valuew
+
+We will work with the `flights` dataset
+
+```{r}
+data(flights) # To load the dataset into memory
+```
+
+### Parsing dates
+
+With no parsing:
+
+```{r}
+# Prior to parsing dates
+date <- "30-03-2024" # R will read this as a string
+
+date
+class(date)
+
+# Test our 'date'
+# date + 1 # gives error
+
+"01-05-2024" < date
+
+is.character(date)
+```
+
+With parsing (using `lubridate`):
+
+```{r}
+parsed_date <- dmy(date)
+
+parsed_date
+class(parsed_date)
+
+# Test our 'date'
+parsed_date + 1
+
+dmy("01-05-2024") < parsed_date
+
+is.character(parsed_date)
+
+# Use Lubridate's is.Date to check if parsed_date is date type
+is.Date(parsed_date)
+
+# Using base R's 'as.Date()'
+date # = "30-03-2024"
+parsed_date <- as.Date(date) # attempt 1: expects yyyy-mm-dd by default. Will not work properly
+parsed_date <- as.Date(date, format = "%d-%m-%y") # Attempt 2: not quite!
+parsed_date <- as.Date(date, format = "%d-%m-%Y") # Attempt 3
+
+parsed_date
+
+# Using the clock package
+parsed_date <- date_parse(date, format = "%d-%m-%Y")
+
+parsed_date
+```
+
+Checking dates are parsed in an analytical workflow:
+
+```{r}
+# Example weather data
+data <-
+  readr::read_csv("10_resources/weather_data.csv")
+
+# Plot the time-series
+library(ggplot2)
+ggplot(data, aes(DATE, TEMP)) +
+  geom_point() +
+  geom_line()
+
+# Check the class of `DATE`
+dplyr::glimpse(data)
+
+# Parse the DATE column
+data$DATE <- mdy(data$DATE)
+
+# Re-check the class of `DATE`
+dplyr::glimpse(data)
+
+# Replot the time-series
+ggplot(data, aes(DATE, TEMP)) +
+  geom_point() +
+  geom_line()
+```
+
+### Extracting date components from a `Date`
+
+```{r}
+parsed_date
+
+# Using the lubridate package
+year(parsed_date)
+month(parsed_date)
+day(parsed_date)
+
+
+# Using these in a piped workflow
+# Make a version of `flights` with one column only
+dates <-
+  flights |>
+  dplyr::select(time_hour)
+
+# Use dplyr::mutate(), month(), and year() to create new columns for the extracted month and year variables
+dates |>
+  dplyr::mutate(
+    month = month(time_hour),
+    year = year(time_hour)
+  )
+
+# Use dplyr::filter(), with month(), and year() to cfilter the tibble
+dates |>
+  dplyr::filter(
+    day(time_hour) == 1,
+    month(time_hour) == 1
+  )
+
+
+# Using base R:
+dates$time_hour[1] # working with the first observation only
+
+format(dates$time_hour[1], format = "%m")
+
+# Using the clock package:
+get_year(dates$time_hour[1])
+get_month(dates$time_hour[1])
+get_day(dates$time_hour[1])
+```
+
+### Parsing times
+
+```{r}
+# Note how the time_hour variable has time in it also
+class(dates$time_hour)
+
+# Using the lubridate package
+date_time_str <- "2023-01-01 12:34:00"
+
+date_time <- ymd_hms(date_time_str)
+
+date_time
+
+# Using the clock package
+# date_time <- date_time_parse(date_time_str, format = "%Y-%m-%d %H:%M:%S") # Gives an error as no timezone is specified (strictness/explicitness is helpful in coding!)
+
+date_time <- date_time_parse(date_time_str, format = "%Y-%m-%d %H:%M:%S", zone = "Europe/London")
+
+date_time
+```
+
+### Arithmetic with dates and times
+
+```{r}
+date_time - 1 # As this is "POSIXct" "POSIXt" , 1 second is removed here
+
+# Using lubridate
+yesterday <- date_time - days(1)
+yesterday
+
+# In a pipe
+dates |>
+  dplyr::mutate(next_week = time_hour + weeks(1))
+```
+
+```{r}
+# Date / Date_time objects made using lubridate will have a defualt timezone
+tz(yesterday) # = UTC / Coordinated Universal Time
+with_tz(yesterday, tzone = "America/New_York")
+
+# These can be set at the time of parsing the date
+date_time <- ymd_hms("2023-01-01 12:34:00", tz = "America/New_York")
+
+# Or using `force_tz` if the date has already been parsed
+yesterday <- force_tz(yesterday, "America/New_York")
+with_tz(yesterday, tzone = "Europe/London")
+
+# In a dplyr pipe, make a column showing the times in London
+dates_tz <-
+  dates |>
+  dplyr::mutate(london = ymd_hms(time_hour, tz = "Europe/London"))
+
+# See a list of timezones
+base::OlsonNames()
+
+# Generate a new column showing the equivelent time in New York
+dates_tz <-
+  dates_tz |>
+  dplyr::mutate(new_york = with_tz(london, "America/New_York"))
+```
+
+### Calculating time differences
+
+```{r}
+# Parse the dep_time columns so they're easier to work with
+flights$dep_datetime <- 
+  make_datetime(
+    flights$year,
+    flights$month,
+    flights$day,
+    flights$dep_time %/% 100,
+    flights$dep_time %% 100
+  )
+
+flights$arr_datetime <-
+  make_datetime(
+    flights$year,
+    flights$month,
+    flights$day,
+    flights$arr_time %/% 100,
+    flights$arr_time %% 100
+  )
+
+flights$dep_datetime[1]
+flights$arr_datetime[1]
+
+# Base R
+difftime(flights$dep_datetime[1], flights$arr_datetime[1])
+
+# Lubridate: duration
+as.duration(
+  interval(
+    flights$dep_datetime[1],
+    flights$arr_datetime[1]
+  )
+)
+
+# Lubridate: period
+as.period(
+  interval(
+    flights$dep_datetime[1],
+    flights$arr_datetime[1]
+  )
+)
+```
+
+### 
+
+### R date formatting reference
+
+^Taken from: <https://gist.github.com/zross/7fbbc034459aeff36627>^
+
+|     |                                                                                                                                                                                                                                                                                                                  |
+|-----------|-------------------------------------------------------------|
+| %y  | Year without century (00–99). On input, values 00 to 68 are prefixed by 20 and 69 to 99 by 19                                                                                                                                                                                                                    |
+| %Y  | Year with century.                                                                                                                                                                                                                                                                                               |
+| %m  | Month as decimal number (01–12).                                                                                                                                                                                                                                                                                 |
+| %d  | Day of the month as decimal number (01–31).                                                                                                                                                                                                                                                                      |
+| %e  | Day of the month as decimal number (1–31), with a leading space for a single-digit number.                                                                                                                                                                                                                       |
+| %H  | Hours as decimal number (00–23). As a special exception strings such as 24:00:00 are accepted for input, since ISO 8601 allows these.                                                                                                                                                                            |
+| %I  | Hours as decimal number (01–12).                                                                                                                                                                                                                                                                                 |
+| %M  | Minute as decimal number (00–59).                                                                                                                                                                                                                                                                                |
+| %R  | Equivalent to %H:%M.                                                                                                                                                                                                                                                                                             |
+| %T  | Equivalent to %H:%M:%S.                                                                                                                                                                                                                                                                                          |
+| %p  | AM/PM indicator in the locale. Used in conjunction with %I and not with %H.                                                                                                                                                                                                                                      |
+| %a  | Abbreviated weekday name in the current locale on this platform. (Also matches full name on input: in some locales there are no abbreviations of names.)                                                                                                                                                         |
+| %A  | Full weekday name in the current locale. (Also matches abbreviated name on input.)                                                                                                                                                                                                                               |
+| %b  | Abbreviated month name in the current locale on this platform. (Also matches full name on input: in some locales there are no abbreviations of names.)                                                                                                                                                           |
+| %B  | Full month name in the current locale. (Also matches abbreviated name on input.)                                                                                                                                                                                                                                 |
+| %c  | Date and time. Locale-specific on output, "%a %b %e %H:%M:%S %Y" on input.                                                                                                                                                                                                                                       |
+| %C  | Century (00–99): the integer part of the year divided by 100.                                                                                                                                                                                                                                                    |
+| %D  | Date format such as %m/%d/%y: ISO C99 says it should be that exact format.                                                                                                                                                                                                                                       |
+| %F  | Equivalent to %Y-%m-%d (the ISO 8601 date format).                                                                                                                                                                                                                                                               |
+| %g  | The last two digits of the week-based year (see %V). (Accepted but ignored on input.)                                                                                                                                                                                                                            |
+| %G  | The week-based year (see %V) as a decimal number. (Accepted but ignored on input.)                                                                                                                                                                                                                               |
+| %h  | Equivalent to %b.                                                                                                                                                                                                                                                                                                |
+| %j  | Day of year as decimal number (001–366).                                                                                                                                                                                                                                                                         |
+| %n  | Newline on output, arbitrary whitespace on input.                                                                                                                                                                                                                                                                |
+| %r  | The 12-hour clock time (using the locale's AM or PM). Only defined in some locales.                                                                                                                                                                                                                              |
+| %S  | Second as decimal number (00–61), allowing for up to two leap-seconds (but POSIX-compliant implementations will ignore leap seconds).                                                                                                                                                                            |
+| %t  | Tab on output, arbitrary whitespace on input.                                                                                                                                                                                                                                                                    |
+| %u  | Weekday as a decimal number (1–7, Monday is 1).                                                                                                                                                                                                                                                                  |
+| %U  | Week of the year as decimal number (00–53) using Sunday as the first day 1 of the week (and typically with the first Sunday of the year as day 1 of week 1). The US convention.                                                                                                                                  |
+| %V  | Week of the year as decimal number (01–53) as defined in ISO 8601. If the week (starting on Monday) containing 1 January has four or more days in the new year, then it is considered week 1. Otherwise, it is the last week of the previous year, and the next week is week 1. (Accepted but ignored on input.) |
+| %w  | Weekday as decimal number (0–6, Sunday is 0).                                                                                                                                                                                                                                                                    |
+| %W  | Week of the year as decimal number (00–53) using Monday as the first day of week (and typically with the first Monday of the year as day 1 of week 1). The UK convention.                                                                                                                                        |
+| %x  | Date. Locale-specific on output, "%y/%m/%d" on input.                                                                                                                                                                                                                                                            |
+| %X  | Time. Locale-specific on output, "%H:%M:%S" on input.                                                                                                                                                                                                                                                            |
+| %z  | Signed offset in hours and minutes from UTC, so -0800 is 8 hours behind UTC. Values up to +1400 are accepted as from R 3.1.1: previous versions only accepted up to +1200. (Standard only for output.)                                                                                                           |
+| %Z  | (Output only.) Time zone abbreviation as a character string (empty if not available). This may not be reliable when a time zone has changed abbreviations over the years.                                                                                                                                        |
