@@ -1,0 +1,32 @@
+---
+title: "EARL conference"
+author: "Stephen J. Price"
+format: 
+  html:
+    embed-resources: true
+editor: visual
+---
+
+[EARL (Enterprise applications of the R (and python) language) 2024](https://earl-conference.com/) was in Brighton from 3 to 5 Sept 2024 and was a wonderful experience. The conference is quite small (about 100 delegates this year), has a data science focus, brings together folks from commercial, charity, academia and the civil service. It is incredibly friendly and caters for all comers regardless of your level of (in)experience.  
+
+[Check out the agenda for EARL 2024](https://earl-conference.com/wp-content/uploads/2024/07/EARL-2024-Agenda.pdf) at the conference site. [Hadley Wickham](https://hadley.nz/) was definitely the big draw this year!  
+
+## Community
+
+A company called [Datacove](https://datacove.co.uk/services/training-coaching/) and the linked website points to their training offer.  
+
+[Jumping Rivers](https://www.jumpingrivers.com/training/all-courses/) is a similar type of company that is also heavily involved in the community and I've again linked to their training offer.  
+
+**Community** was a key theme that came through at the conference. We had a wonderful time together and it was very easy to chat to folks about cool data science-y stuff. Datacove is taking a lead on building and supporting this community beyond EARL and is running a number of R user groups around the country.  
+
+My local [R user group is Birmingham](https://www.meetup.com/BirminghamR/) but the group has been dormant for 2 years. Energised by the conference I'm going to help try to get it up and running again `r emo::ji('smile')`.  
+
+[Jumping Rivers hosts some links to other such user groups](https://jumpingrivers.github.io/meetingsR/r-user-groups.html) so it might be helpful in finding a group near you!  
+
+## Interesting stuff we saw
+
+- [{synthpop}](https://synthpop.org.uk/about-synthpop.html#methodology) - an R package for creating fantastic 'synthetic' datasets, which preserve patterns in real datasets but yield a completely made up dataset that might be useful for collaboration, testing, teaching, demonstrating, etc.
+- [parquet file format](https://github.com/apache/parquet-format) - a wonderful, simple way to encode datasets that yields massive compression and can even serve as a simple to implement solution to deliver some features of a full database. See this medium article if you're interested in a [primer on the parquet method](https://towardsdatascience.com/demystifying-the-parquet-file-format-13adb0206705).
+- network building - [Full Fibre](https://fullfibre.co/) is a company bidding for government projects to install fibre optic networks in rural areas. If dendograms are your thing, read on! They've written their own R package (*not* open source) to make a first pass at an optimal network design. It's super cool and makes use of R's excellent resources for all things geospatial. A key package for this project that i've not used before is [{sfnetworks}](https://luukvdmeer.github.io/sfnetworks/).
+- survival analysis - I've used R's [{survival} pkg](https://github.com/therneau/survival) to do conventional [survival analysis on dead frogs](https://www.researchgate.net/figure/Effect-of-temperature-and-ranavirus-exposure-on-survival-of-common-frogs-The-proportion_fig4_332978504) in the past, but a cool talk from a Posit employee opened my eyes to the many other potential applications for this statistical framework with a talk on customer churn. Have a think and let me know if you've got data that would be perfect for analysing in this way!
+- optimisation/linear programming - vodophone's lead data scientist gave a fabulous talk demonstrating how to apply this approach to scheduling engineers' jobs. We've got an almost identical problem in terms of scheduling centre visits for EQAs and IEPAs at C&G and helpfully [he's shared all the code for running this against a toy example](https://timothywong731.github.io/scheduling/).
