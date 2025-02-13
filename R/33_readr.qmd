@@ -1,0 +1,118 @@
+---
+title: "reading data"
+author: "Stephen J. Price"
+format: 
+  html:
+    embed-resources: true
+execute:
+  eval: false
+editor: source
+---
+
+::: {.callout-note}
+this won't work well as a standalone document as it relies on copying data from a spreadsheet doc. Sorry!
+:::
+
+```{r}
+#| label: env
+library(readr)
+```
+
+[{readr} pkgdown](https://readr.tidyverse.org/reference/read_delim.html)
+
+## read clipboard
+
+```{r}
+read_csv(clipboard())
+read_tsv(clipboard())
+```
+
+## skip rows
+
+### at head
+
+```{r}
+read_tsv(clipboard(), skip_empty_rows = FALSE)
+
+```
+
+```{r}
+read_tsv(clipboard(), skip_empty_rows = TRUE)
+
+```
+
+### anywhere
+
+```{r}
+read_tsv(clipboard(), skip_empty_rows = FALSE)
+
+```
+
+```{r}
+read_tsv(clipboard(), skip_empty_rows = TRUE)
+
+```
+
+```{r}
+read_tsv(clipboard())
+
+```
+
+## column names
+
+```{r}
+read_tsv(clipboard())
+```
+
+```{r}
+read_tsv(clipboard(), col_names = FALSE)
+```
+
+```{r}
+read_tsv(clipboard(), col_names = LETTERS[1:3])
+```
+### name repair
+
+```{r}
+read_tsv(clipboard())
+```
+
+```{r}
+read_tsv(clipboard(), name_repair = "minimal")
+```
+
+```{r}
+read_tsv(clipboard(), name_repair = janitor::make_clean_names)
+```
+
+## show col types
+
+```{r}
+read_tsv(clipboard(), show_col_types = FALSE)
+
+```
+
+
+## missing values
+
+```{r}
+read_tsv(clipboard(), show_col_types = FALSE)
+
+```
+
+```{r}
+read_tsv(clipboard(), show_col_types = FALSE, na = c("", "NA", "unknown", "missing"))
+
+```
+
+## selecting columns
+
+```{r}
+read_tsv(clipboard())
+
+```
+
+```{r}
+read_tsv(clipboard(), col_select = dplyr::starts_with("col"))
+
+```

@@ -1,0 +1,90 @@
+---
+title: "regular expressions"
+author: "Stephen J. Price"
+format: 
+  html:
+    embed-resources: true
+editor: source
+---
+
+```{r}
+library(stringr)
+```
+
+
+```{r}
+vignette("regular-expressions", package = "stringr")
+```
+
+
+## escaping
+
+```{r}
+mytext <- "They realized they had used the wrong language."
+str_extract(mytext, "language.")
+
+mytext <- "They realized they had used the wrong languages."
+str_extract(mytext, "language.")
+
+mytext <- "They realized they had used the wrong language."
+str_extract(mytext, "language\\.")
+
+```
+
+
++*$^[](){}
+
+
+
+## multiple characters
+
+*+?
+
+```{r}
+x
+
+
+str_extract(c("aple", "banana", "pear"), "ap+le")
+
+str_extract(c("alm", "calm"), "c*alm")
+str_extract(c("alm", "calm"), "c?alm")
+
+```
+
+
+## brackets
+
+
+```{r}
+str_extract(c("man", "men"), "m[ae]n")
+str_extract(c("man", "men"), "m[^pjr]n")
+
+```
+
+
+
+## anchors
+
+```{r}
+# ^
+str_extract("the then", "^the")
+str_extract("then then", "the")
+
+# $
+
+```
+
+
+
+
+
+
+
+```{r}
+mytext <- "They realized they had used the wrong language"
+str_replace(mytext, "(.*) realized (.*)", "\\1 realised \\2")
+str_replace(mytext, "(.*) realized (.*)", "\\1")
+str_replace(mytext, "(.*) realized (.*)", "\\2")
+
+```
+
