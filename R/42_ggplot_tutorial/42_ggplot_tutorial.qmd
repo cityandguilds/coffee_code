@@ -1,0 +1,160 @@
+---
+title: "ggplot Tutorial"
+format: html
+editor: visual
+---
+
+## ggplot2 - The 'Burger' of the R coding Universe
+
+-   Always some 'bread' and a 'patty'
+
+-   Can add salad and sauces to taste.
+
+-   Build your burger in layers(!)
+
+## Install those packages!
+
+```{r}
+library(tidyverse)
+```
+
+## Grab your data
+
+R includes loads of amazing datasets already pre-loaded in. You can see all available datasets by running the code below.
+
+```{r}
+data()
+```
+
+Let's load in mtcars:
+
+```{r}
+data(mtcars)
+```
+
+## LUMOS!
+
+View the first few rows of the dataset:
+
+```{r}
+head(mtcars)
+```
+
+The all powerful 'View()' function
+
+```{r}
+View(mtcars)
+```
+
+## Let's ggplot!
+
+### The basic burger:
+
+-   Get your bread
+
+-   Choose your patty
+
+-   Multiple pattys?
+
+```{r}
+ggplot(data = mtcars, aes(x = wt, y = mpg)) + # here's our bread!
+  geom_point() # here's our chosen patty 
+  
+```
+
+## Let's add some salad
+
+### Titles and Labels
+
+```{r}
+ggplot(data = mtcars, aes(x = wt, y = mpg)) + # here's our bread!
+  geom_smooth(method = "loess") + # here's our chosen patty 
+  geom_point() + # here's an additional patty
+  labs( # here's some salad items
+  )
+```
+
+## Let's add some sauce
+
+-   Color by Cylinder
+
+```{r, warning = FALSE}
+ggplot(data = mtcars, aes(x = wt, y = mpg)) + # here's our bread!
+  geom_smooth(method = "loess") + # here's our chosen patty 
+  geom_point() + # here's an additional patty
+  labs( # here's some salad items
+    title = "Scatter Plot of Weight vs MPG",
+    x = "Weight",
+    y = "Miles per Gallon (MPG)"
+  )
+```
+
+## Add some seasoning
+
+-   applying themes
+
+```{r, warning = FALSE}
+ggplot(data = mtcars, aes(x = wt, y = mpg, color = cyl)) + # here's our wheat loaf bread!
+  geom_smooth(method = "loess") + # here's our chosen patty 
+  geom_point() + # here's an additional patty
+  labs( # here's some salad items
+    title = "Scatter Plot of Weight vs MPG",
+    x = "Weight",
+    y = "Miles per Gallon (MPG)",
+    color = "Cylinders"
+  )
+```
+
+## Let's make multiple burgers!
+
+-   Use 'faceting' chef
+
+```{r}
+ggplot(data = mtcars, aes(x = wt, y = mpg)) + # here's our bread
+  geom_point() + # here's our patty
+  geom_smooth() + # here's our second patty
+  facet_wrap(~ cyl) # implement our facet chef
+```
+
+## Wizard chef!
+
+-   Introducing plotly
+
+```{r, messages = FALSE}
+library(plotly)
+
+plot <- ggplot(data = mtcars, aes(x = wt, y = mpg, color = cyl)) + # here's our wheat loaf bread!
+  geom_smooth(method = "loess") + # here's our chosen patty 
+  geom_point() + # here's an additional patty
+  labs( # here's some salad items
+    title = "Scatter Plot of Weight vs MPG",
+    x = "Weight",
+    y = "Miles per Gallon (MPG)",
+    color = "Cylinders"
+  ) +
+  theme_bw() # here's our seasoning
+
+ggplotly(plot)
+```
+
+## Serving up
+
+-   ggsave
+
+```{r}
+plot <- ggplot(data = mtcars, aes(x = wt, y = mpg, color = cyl)) + # here's our wheat loaf bread!
+  geom_smooth(method = "loess") + # here's our chosen patty 
+  geom_point() + # here's an additional patty
+  labs( # here's some salad items
+    title = "Scatter Plot of Weight vs MPG",
+    x = "Weight",
+    y = "Miles per Gallon (MPG)",
+    color = "Cylinders"
+  ) +
+  theme_bw() # here's our seasoning
+
+ggsave(
+  plot = plot, 
+  filename = file.path('42_ggplot_tutorial/plot.png')
+)
+```
