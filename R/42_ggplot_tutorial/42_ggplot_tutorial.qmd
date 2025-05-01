@@ -58,7 +58,8 @@ View(mtcars)
 
 ```{r}
 ggplot(data = mtcars, aes(x = wt, y = mpg)) + # here's our bread!
-  geom_point() # here's our chosen patty 
+  geom_point() + # here's our chosen patty
+  geom_smooth(method = "loess")
   
 ```
 
@@ -68,9 +69,12 @@ ggplot(data = mtcars, aes(x = wt, y = mpg)) + # here's our bread!
 
 ```{r}
 ggplot(data = mtcars, aes(x = wt, y = mpg)) + # here's our bread!
-  geom_smooth(method = "loess") + # here's our chosen patty 
-  geom_point() + # here's an additional patty
-  labs( # here's some salad items
+  geom_point() + # here's our chosen patty 
+  geom_smooth(method = "loess") + # here's an additional patty
+  labs(
+    title = "Plot of Weight vs Miles per Gallon (MPG)",
+    x = "Weight",
+    y = "Miles per Gallon (MPG)"
   )
 ```
 
@@ -79,13 +83,14 @@ ggplot(data = mtcars, aes(x = wt, y = mpg)) + # here's our bread!
 -   Color by Cylinder
 
 ```{r, warning = FALSE}
-ggplot(data = mtcars, aes(x = wt, y = mpg)) + # here's our bread!
-  geom_smooth(method = "loess") + # here's our chosen patty 
-  geom_point() + # here's an additional patty
+ggplot(data = mtcars, aes(x = wt, y = mpg, colour = cyl)) + # here's our bread!
+  geom_point() + # here's our chosen patty 
+  geom_smooth(method = "loess") + # here's an additional patty
   labs( # here's some salad items
-    title = "Scatter Plot of Weight vs MPG",
+    title = "Plot of Weight vs MPG",
     x = "Weight",
-    y = "Miles per Gallon (MPG)"
+    y = "Miles per Gallon (MPG)",
+    colour = "Cylinders"
   )
 ```
 
@@ -94,15 +99,16 @@ ggplot(data = mtcars, aes(x = wt, y = mpg)) + # here's our bread!
 -   applying themes
 
 ```{r, warning = FALSE}
-ggplot(data = mtcars, aes(x = wt, y = mpg, color = cyl)) + # here's our wheat loaf bread!
-  geom_smooth(method = "loess") + # here's our chosen patty 
-  geom_point() + # here's an additional patty
+ggplot(data = mtcars, aes(x = wt, y = mpg, colour = cyl)) + # here's our bread!
+  geom_point() + # here's our chosen patty 
+  geom_smooth(method = "loess") + # here's an additional patty
   labs( # here's some salad items
-    title = "Scatter Plot of Weight vs MPG",
+    title = "Plot of Weight vs MPG",
     x = "Weight",
     y = "Miles per Gallon (MPG)",
-    color = "Cylinders"
-  )
+    colour = "Cylinders"
+  ) +
+  theme_bw()
 ```
 
 ## Let's make multiple burgers!
@@ -112,29 +118,29 @@ ggplot(data = mtcars, aes(x = wt, y = mpg, color = cyl)) + # here's our wheat lo
 ```{r}
 ggplot(data = mtcars, aes(x = wt, y = mpg)) + # here's our bread
   geom_point() + # here's our patty
-  geom_smooth() + # here's our second patty
-  facet_wrap(~ cyl) # implement our facet chef
+  geom_smooth(method = "loess") + # here's our second patty
+  facet_wrap(~ cyl, nrow = 3) # implement our facet chef
 ```
 
 ## Wizard chef!
 
 -   Introducing plotly
 
-```{r, messages = FALSE}
+```{r, warning = FALSE}
 library(plotly)
 
-plot <- ggplot(data = mtcars, aes(x = wt, y = mpg, color = cyl)) + # here's our wheat loaf bread!
-  geom_smooth(method = "loess") + # here's our chosen patty 
-  geom_point() + # here's an additional patty
+burger <- ggplot(data = mtcars, aes(x = wt, y = mpg, colour = cyl)) + # here's our bread!
+  geom_point() + # here's our chosen patty 
+  geom_smooth(method = "loess") + # here's an additional patty
   labs( # here's some salad items
-    title = "Scatter Plot of Weight vs MPG",
+    title = "Plot of Weight vs MPG",
     x = "Weight",
     y = "Miles per Gallon (MPG)",
-    color = "Cylinders"
+    colour = "Cylinders"
   ) +
   theme_bw() # here's our seasoning
 
-ggplotly(plot)
+ggplotly(burger)
 ```
 
 ## Serving up
@@ -142,19 +148,22 @@ ggplotly(plot)
 -   ggsave
 
 ```{r}
-plot <- ggplot(data = mtcars, aes(x = wt, y = mpg, color = cyl)) + # here's our wheat loaf bread!
-  geom_smooth(method = "loess") + # here's our chosen patty 
-  geom_point() + # here's an additional patty
+burger <- ggplot(data = mtcars, aes(x = wt, y = mpg, colour = cyl)) + # here's our bread!
+  geom_point() + # here's our chosen patty 
+  geom_smooth(method = "loess") + # here's an additional patty
   labs( # here's some salad items
-    title = "Scatter Plot of Weight vs MPG",
+    title = "Plot of Weight vs MPG",
     x = "Weight",
     y = "Miles per Gallon (MPG)",
-    color = "Cylinders"
+    colour = "Cylinders"
   ) +
   theme_bw() # here's our seasoning
 
 ggsave(
-  plot = plot, 
-  filename = file.path('42_ggplot_tutorial/plot.png')
+  plot = burger, 
+  filename = file.path('plot.png'),
+  width = 9,
+  height = 7,
+  units = "in"
 )
 ```
