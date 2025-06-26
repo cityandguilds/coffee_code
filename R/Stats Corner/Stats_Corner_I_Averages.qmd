@@ -1,0 +1,147 @@
+---
+title: "Averages"
+format: html
+editor: visual
+---
+
+## What are averages?
+
+-   Mean: The arithmetic average
+
+    -   Sum up the values and divide by the number of values
+
+-   Median: The middle value
+
+    -   Order your values and take the middle value
+
+-   Mode: The most frequent value
+
+    -   Calculate the frequency of each value and take whichever has the highest frequency
+
+## Example - Ames Housing Dataset
+
+```{r, message=F}
+ames_housing = readr::read_csv(
+  "C:/Users/AlisonTe/OneDrive - City & Guilds/Documents/Coffee and Code/AmesHousing.csv"
+)
+```
+
+### SalePrice
+
+```{r}
+sales_price = ames_housing$SalePrice
+  
+```
+
+### Mean
+
+Sum up the values and divide by the number of values...
+
+#### Step 1: Sum up the values
+
+```{r}
+sales_price_sum = sum(sales_price)
+sales_price_sum
+```
+
+#### Step 2: Get the length
+
+```{r}
+sales_price_length = length(sales_price)
+sales_price_length
+```
+
+#### Step 3: Result
+
+```{r}
+mean_sales_price = sales_price_sum / sales_price_length
+mean_sales_price
+```
+
+#### Quicker Method
+
+```{r}
+mean(sales_price)
+```
+
+### Median
+
+Order your values and take the middle value...
+
+What is the middle number in this set of numbers?
+
+1.  {1, 2, 3, 4, 5}
+
+2.  {1, 2, 3, 4}
+
+In set 1. the middle value is 3, in set 2, the middle value is between 2 and 3.
+
+In fact, whenever the length of our set of values is odd, the middle value will always be $(n+1)/2$ where $n$ represents the length of our set of values.
+
+Whenever the length of our set of values is even, the middle value will always be between the $n/2$ value and the $n/2 + 1$ value. In this case, we would take the mean of the $n/2$ and $n/2 + 1$ value.
+
+#### Step 1: Sort the values
+
+```{r}
+sales_price_sorted = sort(sales_price)
+```
+
+#### Step 2: Get the length
+
+```{r}
+sales_price_length = length(sales_price)
+```
+
+#### Step 3: Determine whether the length is even or odd
+
+`x %% y` is equivalent to saying: how much is left if I divide `x` by `y`?
+
+`x == y` is equivalent to asking the question: is x equal to y?
+
+```{r}
+sales_price_length_odd = sales_price_length %% 2 == 1
+```
+
+#### Step 4: Find the median
+
+```{r}
+# If there is an odd number of elements...
+if ( sales_price_length_odd ){
+  median_sales_price = sales_price_sorted[(sales_price_length + 1) / 2]
+} else { # otherwise i.e. there is an even number of elements...
+  median_sales_price = (sales_price_sorted[sales_price_length / 2] + sales_price_sorted[(sales_price_length / 2) + 1]) / 2
+}
+median_sales_price
+
+```
+
+#### Quicker Method
+
+```{r}
+median(sales_price)
+```
+
+### Mode
+
+Calculate the frequency of each value and take whichever has the highest frequency.
+
+#### Step 1: Calculate the frequency
+
+```{r}
+sales_price_frequency = table(sales_price)
+
+```
+
+#### Step 2: Find the maximum frequency
+
+```{r}
+max_freq = max(sales_price_frequency)
+max_freq
+```
+
+#### Step 3: Get the corresponding sales price
+
+```{r}
+mode_sales_price = sales_price_frequency[which(sales_price_frequency == max_freq)]
+mode_sales_price
+```
