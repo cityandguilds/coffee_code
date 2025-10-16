@@ -1,0 +1,81 @@
+---
+title: "Let's make an assessment plot"
+format:
+  docx:
+    reference-doc: custom-reference-doc.docx
+editor: visual
+params:
+  component_no: NULL
+  series: NULL
+warning: false
+echo: false
+message: false
+---
+
+```{r}
+#| label: libraries-functions
+
+library(tidyverse)
+walk(list.files("R", full.names = TRUE), ~source(.))
+
+```
+
+```{r}
+#| label: data
+
+data_raw <- readRDS("data/data.rds") |> 
+  namer::unify_names() 
+
+names <- data_raw |> 
+  filter(component != "",
+         !is.na(component)) |> 
+  distinct(component_no, component)
+
+mad <- data_raw |> 
+  mutate(series = create_series(exam_delivery_date)) |> 
+  select(enrolment_no, series, component_no, raw_mark) |> 
+  filter(component_no %in% params$component_no,
+         series %in% params$series,
+         raw_mark != 0)
+ 
+```
+
+\
+
+## Count of raw marks for `r names |> filter(component_no %in% params$component_no) |> pull(component)` in `r params$series`
+
+```{r}
+#| label: plot
+
+mad |> my_plot()
+
+```
+
+\
+
+## Table of the raw data for `r params$component_no`
+
+This table shows the first 6 observations of a table of `r mad |> nrow()` rows.
+
+```{r}
+#| label: table
+
+mad |> 
+  head() |> 
+  knitr::kable()
+
+```
+
+\
+
+## Summary statistics for `r params$component_no`
+
+```{r}
+#| label: summary-stats
+
+mad |> 
+  summary_stats() |> 
+  mutate(across(everything(), ~round(., 2))) |> 
+  knitr::kable()
+
+```
