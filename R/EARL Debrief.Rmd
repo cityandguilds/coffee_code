@@ -1,0 +1,65 @@
+---
+title: "EARL Debrief"
+author: "Alison, Sam and Stephen"
+output: html_document
+---
+
+## POSIT Connect
+
+-   Seems super easy to use and can publish directly from github
+-   `rsconnect::writeManifest()` to create a "manifest" JSON file that contains all package dependencies.
+-   You can include your API keys by configuring environment variables within connect cloud deployment settings (can be encrypted to hide sensitive information - I think!).
+
+## AI
+
+AI workshop link: tinyurl.com/llmshiny
+
+#### Usage
+
+-   {vitals} package can be used to test for result quality specifically aimed at {ellmer}
+-   {btw} package can be used to easily pass R objects into your prompts and works well with {ellmer} e.g.
+
+```{r}
+library(ellmer)
+library(penguins)
+chat <- chat_google_gemini()
+chat$chat("Tell me about the penguins dataset", btw_this(penguins))
+```
+
+-   Worth noting that the bigger the data set, the more tokens are used by the models. So be picky with what data is passed.
+-   Exciting potential applications for the {btw} package is getting an LLM to describe complex statistical output from a model fitted in R.
+-   {shinychat} for embedding a chat function into a shiny app
+-   {querychat} is a more restrictive version of {shinychat} that only allows the LLM to return and apply SQL code. A link to a working example created by Joe Cheng link here: https://jcheng.shinyapps.io/sidebot/
+
+#### Prompt Engineering
+
+-   System prompts can be long - e.g. see system prompt for {querychat}
+-   System prompting is an art form and could potentially require a lot of back and forth to correct behaviour.
+-   To stop hallucinations, add in the system prompt that if it doesn't know it should tell you.
+-   Provide strict examples of what you want the output to look like.
+
+#### Applications
+
+-   Embedding chat bot functionality into already existing apps to explain output of analysis to users.
+-   Using LLM to categorise human responses (e.g. categorizing product testing response, categorizing caller requests.)
+-   Describing statistical output in a human readable language.
+
+## R/Python in Production
+
+-   Keep your R environment tidy! Clean up after every session and always work within projects/workspaces.
+-   R in pharma: daily use of docker and renv for reproducibility. No use of `install.packages()`!
+-   Make snake-make, prefect, airflow (language agnostic)
+-   Litmus/litmusverse
+
+## Positron
+
+-  More mainstream now - many mentions, including from Wes McKinney (a dev on the project)
+-  Now includes built in 'DataBot' for AI-driven EDA of data, as well as a co-pilot plugin.
+-  Recent DataExplorer changes.
+
+## Miscellaneous
+
+-   {qrcode} for creating a QR code
+-   {rvest} for scraping html data
+-   {arrow}, {parquet} and {duckDB} for scaling up
+-   Jupyter
