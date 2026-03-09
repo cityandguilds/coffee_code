@@ -93,7 +93,7 @@ ggplot2::labs(
 #### Continuous
 
 ```{r}
-# Frequency table
+# 
 data |> 
     dplyr::summarise(
         mean_height = mean(Height_cm),
@@ -150,10 +150,10 @@ ordinal_data <- data |>
             Education,
             levels = c("High School","Bachelor","Master","PhD"),
             ordered = TRUE # <- important
-        ),
+        )
     )
 
-ordinal_data |> 
+data |> 
     dplyr::count(Education)
 
 # Bar plot
@@ -173,7 +173,7 @@ ggplot2::labs(
 #### Nominal
 
 ```{r}
-ordinal_data |> 
+data |> 
     dplyr::count(Department)
 
 # Bar plot
@@ -199,7 +199,7 @@ ordinal_edu <- data |>
             Education,
             levels = c("High School","Bachelor","Master","PhD"),
             ordered = TRUE # <- important
-        ),
+        )
     ) |> 
     dplyr::pull(Education)
 
