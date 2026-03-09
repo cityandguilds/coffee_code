@@ -1,0 +1,240 @@
+---
+title: "Let's Talk About Data"
+format: html
+---
+
+```{r}
+# Create a small dataset
+data <- data.frame(
+    Name = c( # Text
+        "Alice","Bob","Charlie","Diana","Ethan",
+        "Fiona","George","Hannah","Ian","Julia"
+    ), 
+    Gender = c( # Nominal Categorical
+        "Female","Male","Male","Female","Male",
+        "Female","Male","Female","Male","Female"
+    ), 
+    Education = c( # Ordinal Categorical
+        "Bachelor","Master","PhD","High School","Bachelor",
+        "Master","PhD","High School","Bachelor","Master"
+    ), 
+    Department = c( # Nominal Categorical
+        "HR","Finance","Engineering","Marketing","Engineering",
+        "Finance","HR","Marketing","Engineering","Finance"
+    ),  
+    Age = c(23, 35, 29, 42, 31, 27, 38, 19, 45, 33),  # Continuous / Discrete Numerical
+    Children = c(0,2,1,3,2,0,1,0,4,2),  # Discrete Numerical
+    PassedExam = c( # Binary
+        TRUE, TRUE, FALSE, TRUE, FALSE,
+        TRUE, TRUE, FALSE, TRUE, TRUE
+    ),  
+    Height_cm = c( # Continuous Numerical
+        165.2, 178.5, 172.0, 160.3, 182.1,
+        168.4, 175.0, 158.9, 180.2, 170.5
+    )  
+)
+
+# Preview the dataset
+View(data)
+```
+
+## Types of Data
+
+In every dataset we work with, the type of data determines everything that follows:
+
+- Which statistical methods we use
+- How we visualise it
+
+Broadly speaking, we can split data into two big families:
+
+1. Numerical - Data represents quantities (e.g. age)
+2. Categorical - Data represents groups or labels (e.g. gender)
+
+Why does it matter?
+If we misclassify our data, we risk using the wrong statistical test and/or drawing misleading conclusions!
+
+### Numerical
+
+- Height of everyone who works at City and Guilds
+- Average daily temperature in the UK
+- Number of ice cream sales 
+- Marks acheived by candidates in exams
+
+Numerical Data can be split into two sub types: 
+1. Discrete - e.g. count data, data cannot be a decimal
+2. Continuous - e.g. measure data, data can be a decimal
+
+#### Discrete
+
+```{r}
+# Frequency table
+data |> 
+    dplyr::count(Children)
+
+# Calculate the median number of children
+data |> 
+    dplyr::summarise(
+        median = median(Children)
+    )
+
+# Bar plot
+ggplot2::ggplot(
+    data = data,
+    ggplot2::aes(x = Children)
+) +
+ggplot2::geom_bar() +
+ggplot2::labs(
+    title = "Number of Children",
+    x = "Children",
+    y = "Frequency"
+)
+```
+
+#### Continuous
+
+```{r}
+# 
+data |> 
+    dplyr::summarise(
+        mean_height = mean(Height_cm),
+        sd_height = sd(Height_cm),
+        min_height = min(Height_cm),
+        max_height = max(Height_cm)
+    )
+
+# Histogram
+ggplot2::ggplot(
+    data = data,
+    ggplot2::aes(x = Height_cm)
+) +
+ggplot2::geom_histogram(
+    bins = 5,
+    colour = "black"
+) +
+ggplot2::labs(
+    title = "Distribution of Heights",
+    x = "Height (cm)",
+    y = "Count"
+)
+
+# Boxplot
+ggplot2::ggplot(
+    data = data,
+    ggplot2::aes(x = Height_cm)
+) +
+ggplot2::geom_boxplot() +
+ggplot2::labs(
+    title = "Distribution of Heights",
+    x = "Height (cm)"
+)
+```
+
+### Categorical
+
+- Department of everyone who works at City and Guilds
+- Survey responses: Strongly disagree, disagree, Nuetral, Agree, Strongly Agree,
+- Clothing sizes: Small, Medium, Large, Extra Large
+- Colours: Red, Blue, Green, Yellow
+- Animals: Dog, Cat, Horse, Elephant
+
+Categorical Data can be split into two sub types: 
+1. Ordinal - Categories with meaningful order, like education levels or satisfaction ratings
+2. Nominal - Categories with no natural order, like department or colour.
+
+#### Ordinal 
+
+```{r}
+ordinal_data <- data |> 
+    dplyr::mutate(
+        Education = factor(
+            Education,
+            levels = c("High School","Bachelor","Master","PhD"),
+            ordered = TRUE # <- important
+        )
+    )
+
+data |> 
+    dplyr::count(Education)
+
+# Bar plot
+ggplot2::ggplot(
+    data = ordinal_data,
+    ggplot2::aes(x = Education)
+) +
+ggplot2::geom_bar() +
+ggplot2::labs(
+    title = "Distribution of Education Levels",
+    x = "Education Level",
+    y = "Count"
+)
+
+```
+
+#### Nominal
+
+```{r}
+data |> 
+    dplyr::count(Department)
+
+# Bar plot
+ggplot2::ggplot(
+    data = ordinal_data,
+    ggplot2::aes(x = Department)
+) +
+ggplot2::geom_bar() +
+ggplot2::labs(
+    title = "Distribution of Departments",
+    x = "Department",
+    y = "Count"
+)
+```
+
+#### Ordinal vs Nominal - The R interpretation
+
+```{r}
+# Let's ensure R understands the order
+ordinal_edu <- data |> 
+    dplyr::mutate(
+        Education = factor(
+            Education,
+            levels = c("High School","Bachelor","Master","PhD"),
+            ordered = TRUE # <- important
+        )
+    ) |> 
+    dplyr::pull(Education)
+
+nominal_edu <- data |> 
+    dplyr::mutate(
+        Education = factor(
+            Education,
+            levels = c("High School","Bachelor","Master","PhD")
+            #ordered = TRUE # <- important
+        ),
+    ) |> 
+    dplyr::pull(Education)
+
+# Why do we need to specify ordered = TRUE?
+# Without this, R doesn't treat the factor as ordinal. 
+# You can still "sort" the factor the same way:
+sort(ordinal_edu) 
+sort(nominal_edu) # like sorting a character variable alphabetically but defining a new alphabet. e.g. alphabet has order but no ranking.
+
+# But you cannot perform numeric like operations on nominal data
+ordinal_edu < "Master"
+nominal_edu < "Master" # Will return error
+```
+
+## Why it matters?
+
+- The type of data determines which visualisation or statistical test to use.
+- Using the wrong statistical test could result in incorrect or misleading results.
+- When you're working in R, being clear with data types can unlock different functions and analyses e.g. ordered factor vs non-ordered factor.
+
+## Bonus data types
+- Binary e.g. TRUE/FALSE, Yes/No etc.
+- Date/Time
+- Free text
+
+ggplot2 cheat sheet:
+Shows you what kind of visualisations you can plot with ggplot2 depending on your data type.
+https://posit.co/wp-content/uploads/2022/10/data-visualization-1.pdf
