@@ -1,0 +1,204 @@
+---
+title: "Correlation: A love story between two variables that shouldn't be dating"
+format: html
+---
+
+# Warm-up: Guess the correlation
+
+- Positive / Negative Correlation?
+- Strong / Weak Correlation?
+- Suggest a number?
+
+## Example 1
+```{r}
+set.seed(1)
+ex1 <- dplyr::tibble(
+  x = rnorm(100),
+  y = -2*x + rnorm(100, sd = 0.3)
+)
+
+ex1 |> 
+  ggplot2::ggplot(ggplot2::aes(x, y)) +
+  ggplot2::geom_point(size = 2) +
+  ggplot2::labs(title = "Example 1") +
+  ggplot2::theme(text = ggplot2::element_text(size = 16))
+```
+
+## Example 2
+```{r}
+set.seed(1)
+ex2 <- dplyr::tibble(
+  x = seq(0, 2, length = 100),
+  y = x^10 + rnorm(100, sd = 0.01)
+)
+
+ex2 |> 
+  ggplot2::ggplot(ggplot2::aes(x, y)) +
+  ggplot2::geom_point(size = 2) +
+  ggplot2::labs(title = "Example 2") +
+  ggplot2::theme(text = ggplot2::element_text(size = 16))
+```
+
+## Example 3
+```{r}
+set.seed(1)
+ex3 <- dplyr::tibble(
+  x = rnorm(100),
+  y = -x + rnorm(100, sd = 1)
+) |> 
+  dplyr::add_row(x = 10, y = 10)
+
+ex3 |> 
+  ggplot2::ggplot(ggplot2::aes(x, y)) +
+  ggplot2::geom_point(size = 2) +
+  ggplot2::labs(title = "Example 3") +
+  ggplot2::theme(text = ggplot2::element_text(size = 16))
+
+```
+
+## Example 4
+```{r}
+set.seed(1)
+ex4 <- dplyr::tibble(
+  x = rnorm(100),
+  y = 0.01*x + rnorm(100, sd = 0.01)
+)
+
+ex4 |> 
+  ggplot2::ggplot(ggplot2::aes(x, y)) +
+  ggplot2::geom_point(size = 2) +
+  ggplot2::labs(title = "Example 4") +
+  ggplot2::lims(y = c(-0.5, 0.5)) +
+  ggplot2::theme(text = ggplot2::element_text(size = 16))
+
+```
+
+# Introducing Spearman and Pearson
+
+## Example 1
+```{r}
+ex1 |> 
+    dplyr::summarise(
+        example = 1,
+        pearson = cor(x, y, method = "pearson"),
+        spearman = cor(x, y, method = "spearman")
+    )
+```
+
+## Example 2
+```{r}
+ex2 |> 
+    dplyr::summarise(
+        example = 2,
+        pearson = cor(x, y, method = "pearson"),
+        spearman = cor(x, y, method = "spearman")
+    )
+```
+
+## Example 3
+```{r}
+ex3 |> 
+    dplyr::summarise(
+        example = 3,
+        pearson = cor(x, y, method = "pearson"),
+        spearman = cor(x, y, method = "spearman")
+    )
+```
+
+## Example 4
+```{r}
+ex4 |> 
+    dplyr::summarise(
+        example = 4,
+        pearson = cor(x, y, method = "pearson"),
+        spearman = cor(x, y, method = "spearman")
+    )
+```
+
+## Key Takeaways
+
+Pearson's Correlation cares about linearity.
+Spearman's Correlation cares about order.
+
+## So when should I use each?
+
+Use Pearson's if:
+- Your data is linear (straight line trend)
+- Your data is normally distributed
+- Your variables are continuous
+
+Use Spearman's if:
+- Your data is not linear
+- Your relationship is monotonic (always increasing or decreasing)
+- Your data contains outliers that may distore Pearsons
+- Your data is ordinal (e.g. ranked data)
+
+# Real Data Example
+
+```{r}
+mtcars_tbl <- mtcars |> 
+  dplyr::as_tibble(rownames = "model")
+```
+
+```{r}
+mtcars_tbl |> 
+  ggplot2::ggplot(ggplot2::aes(hp, mpg)) +
+  ggplot2::geom_point(size = 2) +
+  #ggplot2::geom_smooth(method = "lm", se = FALSE, colour = "red") +
+  ggplot2::labs(title = "Horsepower vs MPG") +
+  ggplot2::theme(text = ggplot2::element_text(size = 16))
+```
+
+
+```{r}
+mtcars_tbl |> 
+  dplyr::summarise(
+    pearson  = cor(hp, mpg, method = "pearson"),
+    spearman = cor(hp, mpg, method = "spearman")
+  )
+```
+
+## Full correlation matrix
+
+```{r}
+numeric_vars <- mtcars_tbl |> 
+    dplyr::select(dplyr::where(is.numeric))
+
+cor_mat <- numeric_vars |> 
+    cor(method = "pearson") |> 
+    as.data.frame() |> 
+    tibble::rownames_to_column("var1") |> 
+    tidyr::pivot_longer(-var1, names_to = "var2", values_to = "correlation")
+```
+
+```{r}
+cor_mat |> 
+  ggplot2::ggplot(ggplot2::aes(var1, var2, fill = correlation)) +
+  ggplot2::geom_tile() +
+  ggplot2::scale_fill_gradient2(limits = c(-1, 1)) +
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)) +
+  ggplot2::labs(title = "Correlation matrix")
+```
+
+
+## Extra Challenges (if there's time)
+Pick two numerical variables from mtcars_tbl and decide whether to use Spearman's or Pearson's
+
+(Not MPG vs HP)
+
+```{r}
+mtcars_tbl |> 
+  ggplot2::ggplot(ggplot2::aes(cyl, disp)) +
+  ggplot2::geom_point(size = 2) +
+  ggplot2::geom_smooth(method = "lm", se = FALSE, colour = "red") +
+  ggplot2::theme(text = ggplot2::element_text(size = 16))
+
+mtcars_tbl |> 
+  dplyr::summarise(
+    pearson  = cor(cyl, disp, method = "pearson"),
+    spearman = cor(cyl, disp, method = "spearman")
+  )
+```
+
+# Bonus: Correlation != Causation
+https://www.tylervigen.com/spurious-correlations
