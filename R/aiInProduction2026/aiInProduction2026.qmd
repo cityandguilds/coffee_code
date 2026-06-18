@@ -20,6 +20,56 @@ editor: visual
 
 ![](https://www.fossilageminerals.com/cdn/shop/articles/Diplodocus_Featured_image_3b37bc8b-b194-4b2b-9b05-d781cf3bc7cb_1024x1024.jpg){fig-alt="I am an AI brontosaurus"}
 
+# Quiz time
+
+## Level 1: 
+
+-  Basic Search & Assistance
+
+You treat AI like a conversational search engine. You ask one-off questions, draft basic emails, or summarize short articles. There is no strategic prompting; you simply take the default response.
+
+## Level 2:
+
+-  Basic Prompt Engineering
+
+You realize that how you ask directly impacts the output. You start providing context, constraints, and explicit formatting rules. You might use techniques like asking the AI to "ask me clarifying questions first" to get better tailored results.
+
+## Level 3: 
+
+-  Reusable Frameworks & Assets
+
+Instead of starting from scratch every time, you build persistent assets. You save customized system prompts, standard operating procedures (SOPs), or templates that you use repeatedly to speed up your personal workflows.
+
+## Level 4:
+
+-  Coding Assistants & Embedded Tools
+
+AI becomes integrated into your specific applications. You use IDE extensions (like GitHub Copilot) for code autocompletion, or AI-powered plugins in your word processors and design software (e.g., Canva or Microsoft Copilot) to augment your creative process.
+
+## Level 5:
+
+-  Agentic Workflows
+
+You stop just prompting and start delegating. You give the AI broad permissions to perform multi-step tasks—such as researching a topic, compiling data, and writing a full report—without requiring your approval at every single step.
+
+## Level 6:
+
+-  Parallel Multi-Agent Systems
+
+You act as a manager for a "mini swarm" of agents. You assign high-level directives, and the AI deploys specialized, interacting agents to handle different parts of the project simultaneously (e.g., one agent conducts research while another formats the document).
+
+## Level 7:
+
+-  Orchestrator & Automation Architect
+
+You build or utilize complex workflows where an AI orchestrator delegates tasks across dozens of specialized agents. Your role shifts from doing the work or directly prompting the AI, to simply reviewing and managing the overall system.
+
+## 
+
+-  Where are you?
+
+-  Where would you like to be?
+
 # Async Agents in Production: Failure Modes and Fixes
 
 ## 
@@ -80,11 +130,11 @@ Agent 1 - Code
 
 - MCP is an API standard (it sends json and gets json back)
 
-<https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/>
+[The Lethal Trifecta](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/)
 
-<https://enpiar.com/mcp-newcastle-2026/#/title-slide>
+[MCP, or not MCP](https://enpiar.com/mcp-newcastle-2026/#/title-slide)
 
-<https://www.researchgate.net/publication/397780605_Adversarial_Poetry_as_a_Universal_Single-Turn_Jailbreak_Mechanism_in_Large_Language_Models>
+[Adversarial Poetry as a Universal Single-Turn Jailbreak Mechanism in LLMs](https://www.researchgate.net/publication/397780605_Adversarial_Poetry_as_a_Universal_Single-Turn_Jailbreak_Mechanism_in_Large_Language_Models)
 
 # Agentic AI and the Future of Software Development
 
