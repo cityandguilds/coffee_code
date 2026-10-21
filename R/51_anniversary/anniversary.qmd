@@ -1,0 +1,49 @@
+---
+title: "Happy Birthday, Coffee & Code"
+author: "Stephen J. Price"
+format: dashboard
+editor: source
+---
+
+```{r}
+dat <- readr::read_csv("../../inst/extdata/attendance.csv")
+```
+
+## Row {height=40%}
+
+
+```{r}
+#| content: valuebox
+#| title: "Thanks for your support!"
+#| icon: chat-right-heart-fill
+#| color: "primary"
+list(value = 1e6)
+```
+
+```{r}
+#| content: valuebox
+#| title: "Meetings"
+#| icon: cup-hot
+#| color: "primary"
+list(
+  value = dat |> dplyr::filter(!hiatus, !is.na(date)) |> nrow()
+)
+```
+
+```{r}
+#| content: valuebox
+#| title: "Crowd"
+#| icon: person-square
+#| color: "info"
+list(
+  value = max(dat$n, na.rm = TRUE)
+)
+```
+
+```{r}
+#| content: valuebox
+#| title: "Apprentice"
+#| icon: mortarboard-fill
+#| color: "success"
+list(value = 1)
+```
